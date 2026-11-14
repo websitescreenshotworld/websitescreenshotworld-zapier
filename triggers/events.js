@@ -96,9 +96,14 @@ const toRecord = (z, envelope) => {
   return record;
 };
 
-const sampleFor = (definition) => {
+/**
+ * The documented example for this event, from the product the Zap picked. The two products send different fields
+ * (an Instant Snap capture has no schedule and no url), and a sample from the wrong one invites mapping a field the
+ * real deliveries never carry. With no product picked, Auto Schedule's, which has the most fields.
+ */
+const sampleFor = (definition, product) => {
   const byProduct = samples[definition.event];
-  return byProduct.auto_schedule || byProduct.instant_snap;
+  return (product && byProduct[product]) || byProduct.auto_schedule || byProduct.instant_snap;
 };
 
 const makeTrigger = (definition) => {
@@ -150,7 +155,10 @@ const makeTrigger = (definition) => {
 
   // Sample data for the Zap editor. There is no API to list past deliveries, so these are the documented
   // examples, in exactly the shape a real delivery has.
-  const performList = () => [toRecord(null, sampleFor(definition))];
+  const performList = (z, bundle) => {
+    const product = definition.products && bundle && bundle.inputData ? bundle.inputData.product : undefined;
+    return [toRecord(null, sampleFor(definition, product))];
+  };
 
   return {
     key: definition.key,

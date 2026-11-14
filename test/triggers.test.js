@@ -115,6 +115,24 @@ describe('instant triggers', () => {
     expect(records[0].file).toContain('hydrate');
   });
 
+  it('shows the sample of the product the Zap picked', async () => {
+    const list = (product) =>
+      appTester(App.triggers.capture_succeeded.operation.performList, {
+        authData: { instant_snap_api_key: KEY },
+        inputData: product ? { product } : {},
+      });
+
+    const instant = await list('instant_snap');
+    expect(instant[0].product).toBe('instant_snap');
+    expect(instant[0].url).toBeUndefined();
+
+    const scheduled = await list('auto_schedule');
+    expect(scheduled[0].product).toBe('auto_schedule');
+    expect(scheduled[0].url).toBeTruthy();
+
+    expect((await list())[0].product).toBe('auto_schedule');
+  });
+
   it('has sample data for every trigger in the shape of a real delivery', async () => {
     for (const trigger of Object.values(App.triggers)) {
       const list = await appTester(trigger.operation.performList, { authData: { instant_snap_api_key: KEY } });
