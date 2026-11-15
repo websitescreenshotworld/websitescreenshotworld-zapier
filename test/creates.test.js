@@ -205,18 +205,38 @@ describe('capture scheduled page now', () => {
 });
 
 describe('connection test', () => {
+  const account = {
+    success: true,
+    key_name: 'Zapier',
+    key_prefix: '0123456789ab',
+    product: 'instant_snap',
+    email: 'you@example.com',
+  };
+
   it('checks each key against its own API', async () => {
     const instant = nock(API, { reqheaders: { 'x-api-key': KEY } })
-      .get('/instant-snap/v1/webhook-endpoints')
-      .reply(200, { success: true, items: [] });
+      .get('/instant-snap/v1/account')
+      .reply(200, account);
     const auto = nock(AUTO, { reqheaders: { 'x-api-key': AUTO_KEY } })
-      .get('/auto-schedule/v1/webhook-endpoints')
-      .reply(200, { success: true, items: [] });
+      .get('/auto-schedule/v1/account')
+      .reply(200, { ...account, product: 'auto_schedule' });
 
-    await appTester(App.authentication.test, {
+    const result = await appTester(App.authentication.test, {
       authData: { instant_snap_api_key: KEY, auto_schedule_api_key: AUTO_KEY },
     });
     instant.done();
     auto.done();
+    expect(result).toEqual({ key_name: 'Zapier', key_prefix: '0123456789ab', email: 'you@example.com' });
+  });
+
+  it('names the connection by email and key name, never by the key', async () => {
+    const label = App.authentication.connectionLabel;
+
+    expect(label(null, { inputData: { key_name: 'Zapier', email: 'you@example.com' } })).toBe(
+      'you@example.com (Zapier)',
+    );
+    expect(label(null, { inputData: { key_name: 'Zapier', email: null } })).toBe('Zapier');
+    expect(label(null, { inputData: { key_name: null, email: 'you@example.com' } })).toBe('you@example.com');
+    expect(label(null, { inputData: {}, authData: { instant_snap_api_key: KEY } })).not.toContain('wsw_api_');
   });
 });

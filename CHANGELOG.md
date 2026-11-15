@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4
+
+- The connection is named after the key's creator and the key, e.g. "you@example.com (Zapier)", so two connected
+  accounts can be told apart. The connection test asks the new `GET /account` route of each API (Instant Snap API
+  1.4.0, Auto Schedule API 1.3.0) instead of listing webhook endpoints; the key itself never appears in the label.
+  Needs the API release that adds `/account` (WSW 0.0.172) to be live before this version is pushed.
+
 ## 1.0.3
 
 - Capture Succeeded and Capture Failed: with no product picked, the sample now has only the fields both products
