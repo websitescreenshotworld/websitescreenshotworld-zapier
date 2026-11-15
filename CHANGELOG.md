@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+- Capture Succeeded and Capture Failed: with no product picked, the sample now has only the fields both products
+  send. It used to be an Auto Schedule capture, whose schedule_id, schedule_name and sitemap_run_id an Instant Snap
+  delivery never carries, which Zapier's validator reports.
+
 ## 1.0.2
 
 - Capture Succeeded and Capture Failed: Instant Snap captures now carry the page's URL, which the API sends from

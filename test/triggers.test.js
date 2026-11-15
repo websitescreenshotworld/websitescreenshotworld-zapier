@@ -135,6 +135,24 @@ describe('instant triggers', () => {
     expect((await list())[0].product).toBe('auto_schedule');
   });
 
+  it('offers only the fields both products send when no product is picked', async () => {
+    const samplesJson = require('../lib/samples.json');
+    const { EVENTS } = require('../triggers/events');
+    for (const definition of EVENTS) {
+      const byProduct = samplesJson[definition.event] || {};
+      if (!byProduct.auto_schedule || !byProduct.instant_snap) continue;
+
+      const sample = App.triggers[definition.key].operation.sample;
+      const instantKeys = Object.keys(byProduct.instant_snap.data).map((k) => (k === 'id' ? 'capture_id' : k));
+      for (const name of ['schedule_id', 'schedule_name', 'sitemap_run_id']) {
+        expect(sample).not.toHaveProperty(name);
+      }
+      for (const name of Object.keys(sample).filter((k) => !['id', 'event', 'product', 'created_at'].includes(k))) {
+        expect(instantKeys).toContain(name);
+      }
+    }
+  });
+
   it('has sample data for every trigger in the shape of a real delivery', async () => {
     for (const trigger of Object.values(App.triggers)) {
       const list = await appTester(trigger.operation.performList, { authData: { instant_snap_api_key: KEY } });

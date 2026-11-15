@@ -99,11 +99,22 @@ const toRecord = (z, envelope) => {
 /**
  * The documented example for this event, from the product the Zap picked. The two products send different fields
  * (an Instant Snap capture has no schedule), and a sample from the wrong one invites mapping a field the
- * real deliveries never carry. With no product picked, Auto Schedule's, which has the most fields.
+ * real deliveries never carry. With no product picked, only the fields both products send (15 Nov 2026): Zapier's
+ * validator checks that every field of a trigger's sample appears in its real deliveries, and an Auto Schedule
+ * sample offered schedule_id, schedule_name and sitemap_run_id, which an Instant Snap capture never carries.
  */
 const sampleFor = (definition, product) => {
   const byProduct = samples[definition.event];
-  return (product && byProduct[product]) || byProduct.auto_schedule || byProduct.instant_snap;
+  if (product && byProduct[product]) return byProduct[product];
+
+  const scheduled = byProduct.auto_schedule;
+  const instant = byProduct.instant_snap;
+  if (!scheduled || !instant) return scheduled || instant;
+
+  const shared = Object.fromEntries(
+    Object.entries(scheduled.data || {}).filter(([name]) => Object.prototype.hasOwnProperty.call(instant.data || {}, name))
+  );
+  return { ...scheduled, data: shared };
 };
 
 const makeTrigger = (definition) => {
