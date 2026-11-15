@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2
+
+- Capture Succeeded and Capture Failed: Instant Snap captures now carry the page's URL, which the API sends from
+  version 1.3.0. The test records show it.
+
 ## 1.0.1
 
 - Capture Succeeded and Capture Failed: the test record now comes from the product picked in the trigger. It used to

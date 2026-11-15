@@ -124,7 +124,9 @@ describe('instant triggers', () => {
 
     const instant = await list('instant_snap');
     expect(instant[0].product).toBe('instant_snap');
-    expect(instant[0].url).toBeUndefined();
+    // Instant Snap events name their page since API 1.3.0, as Auto Schedule events always have.
+    expect(instant[0].url).toBe('https://example.com/pricing');
+    expect(instant[0].schedule_id).toBeUndefined();
 
     const scheduled = await list('auto_schedule');
     expect(scheduled[0].product).toBe('auto_schedule');
